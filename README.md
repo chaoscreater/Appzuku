@@ -42,17 +42,15 @@ https://github.com/chaoscreater/Appzuku/blob/main/app-debug.apk
 - **RAM Monitoring**: Real-time display of system RAM usage.
 
 ## Screenshots
-<img width="412" height="861" alt="image" src="https://github.com/user-attachments/assets/dab95638-aefa-412e-a2c9-3caa55c16d8b" />
-<img width="418" height="870" alt="image" src="https://github.com/user-attachments/assets/ebcbc6db-74ba-4d23-af1c-f3b9a68eebda" />
-<img width="411" height="869" alt="image" src="https://github.com/user-attachments/assets/854e4811-b766-4a5e-a94f-1613f0c9d881" />
+<div align="center">
+  <img width="412" height="861" alt="image" src="https://github.com/user-attachments/assets/dab95638-aefa-412e-a2c9-3caa55c16d8b" />
+  <img width="418" height="870" alt="image" src="https://github.com/user-attachments/assets/ebcbc6db-74ba-4d23-af1c-f3b9a68eebda" />
+  <img width="411" height="869" alt="image" src="https://github.com/user-attachments/assets/854e4811-b766-4a5e-a94f-1613f0c9d881" />
+</div>
 
 ## Requirements
 - **Android Version**: 6.0 (SDK 23) or higher.
 - **Shizuku or Root**: Appzuku requires Root access or the Shizuku app to be running.
-
-## Installation
-You can download and install Appzuku via:
-**GitHub Releases**: Download the latest APK from the [Releases page](https://github.com/northmendo/Appzuku/releases).
 
 ## License
 Appzuku is licensed under the [GNU General Public License v3.0](LICENSE).
