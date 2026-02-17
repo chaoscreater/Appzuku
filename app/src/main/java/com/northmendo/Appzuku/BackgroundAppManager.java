@@ -693,6 +693,84 @@ public class BackgroundAppManager {
 
     }
 
+    /**
+     * Immediately kills every running app that is not whitelisted, not hidden, and not
+     * protected – without waiting for any periodic scheduler or RAM threshold.
+     * This powers the Kill-All FAB and the external broadcast intent.
+     *
+     * Logic mirrors performAutoKill but:
+     *   • Uses the already-loaded currentAppsList (no extra shell probe needed)
+     *   • Always runs regardless of kill-mode setting (whitelist is always respected)
+     *   • Posts a toast and a status notification on completion
+     */
+    public void killAllNonWhitelisted(Runnable onComplete) {
+        if (!shellManager.hasAnyShellPermission()) {
+            shellManager.checkShellPermissions();
+            if (onComplete != null) handler.post(onComplete);
+            return;
+        }
+
+        executor.execute(() -> {
+            Set<String> hiddenApps  = getHiddenApps();
+            Set<String> whitelisted = getWhitelistedApps();
+
+            // Build the list of packages to kill from the last-known running list
+            List<String> toKill = new ArrayList<>();
+            long totalBytes = 0;
+            for (AppModel app : currentAppsList) {
+                String pkg = app.getPackageName();
+                if (hiddenApps.contains(pkg))            continue;
+                if (whitelisted.contains(pkg))           continue;
+                if (ProtectedApps.isProtected(context, pkg)) continue;
+                if (app.isWhitelisted())                 continue;
+                toKill.add(pkg);
+                totalBytes += app.getAppRamBytes();
+            }
+
+            if (toKill.isEmpty()) {
+                handler.post(() -> Toast.makeText(context,
+                        "No apps to kill", Toast.LENGTH_SHORT).show());
+                if (onComplete != null) handler.post(onComplete);
+                return;
+            }
+
+            // DB logging
+            long now = System.currentTimeMillis();
+            com.northmendo.Appzuku.db.AppDatabase db =
+                    com.northmendo.Appzuku.db.AppDatabase.getInstance(context);
+            for (String pkg : toKill) {
+                com.northmendo.Appzuku.db.AppStats stats = db.appStatsDao().getStats(pkg);
+                if (stats == null) {
+                    stats = new com.northmendo.Appzuku.db.AppStats(pkg);
+                    try {
+                        android.content.pm.ApplicationInfo ai =
+                                context.getPackageManager().getApplicationInfo(pkg, 0);
+                        stats.appName = context.getPackageManager()
+                                .getApplicationLabel(ai).toString();
+                    } catch (android.content.pm.PackageManager.NameNotFoundException ignored) {}
+                    db.appStatsDao().insert(stats);
+                }
+                db.appStatsDao().incrementKill(pkg, now);
+            }
+
+            String killCommand = toKill.stream()
+                    .map(pkg -> "am force-stop " + pkg)
+                    .collect(Collectors.joining("; "));
+
+            final long finalBytes = totalBytes;
+            final int  killCount  = toKill.size();
+            shellManager.runShellCommand(killCommand + "; am kill-all", () -> {
+                String msg = "Killed " + killCount + " app"
+                        + (killCount == 1 ? "" : "s")
+                        + " · freed " + formatMemorySize(finalBytes);
+                handler.post(() -> Toast.makeText(context, msg, Toast.LENGTH_LONG).show());
+                sendKillNotification(killCount);
+                updateWidget();
+                if (onComplete != null) onComplete.run();
+            });
+        });
+    }
+
     // Kill a single app by package name
     public void killApp(String packageName, Runnable onComplete) {
         if (!shellManager.hasAnyShellPermission()) {

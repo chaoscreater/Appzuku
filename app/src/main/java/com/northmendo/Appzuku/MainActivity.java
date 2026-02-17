@@ -97,6 +97,10 @@ public class MainActivity extends BaseActivity {
         // Configure listeners
         setupListeners();
 
+        // Kill-All FAB is always visible; selection FAB shows only when items are selected
+        binding.fabKillAll.show();
+        binding.fab.hide();
+
         // Initialize SharedPreferences and load settings
         loadSettingsAndApplyToManager();
 
@@ -127,6 +131,7 @@ public class MainActivity extends BaseActivity {
     private void setupListeners() {
         binding.swiperefreshlayout1.setOnRefreshListener(this::loadBackgroundApps);
         binding.fab.setOnClickListener(view -> killSelectedApps());
+        binding.fabKillAll.setOnClickListener(view -> killAllApps());
 
         listAdapter.setOnAppActionListener(new BackgroundAppsRecyclerViewAdapter.OnAppActionListener() {
             @Override
@@ -362,6 +367,22 @@ public class MainActivity extends BaseActivity {
         });
     }
 
+    // Kill ALL running apps that are not whitelisted or hidden
+    private void killAllApps() {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Kill All Apps")
+                .setMessage("This will force-stop every running app that is not whitelisted or hidden. Continue?")
+                .setPositiveButton("Kill All", (dialog, which) -> {
+                    binding.fabKillAll.hide();
+                    appManager.killAllNonWhitelisted(() -> {
+                        loadBackgroundApps();
+                        binding.fabKillAll.show();
+                    });
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
     // Toggle between "Select All" and "Unselect All" based on whether any item is
     // selected
     private void updateSelectMenuVisibility() {
@@ -371,6 +392,8 @@ public class MainActivity extends BaseActivity {
         } else {
             binding.fab.hide();
         }
+        // Kill-All FAB is independent of selection — always keep it visible
+        binding.fabKillAll.show();
         if (selectAllItem != null && unselectAllItem != null) {
             selectAllItem.setVisible(!hasSelection);
             unselectAllItem.setVisible(hasSelection);

@@ -49,7 +49,14 @@
             android:foregroundServiceType="dataSync"
             android:exported="false" />
 
-        <receiver android:name=".KillTriggerReceiver" android:exported="true" />
+        <receiver android:name=".KillTriggerReceiver"
+            android:exported="true">
+            <!-- External trigger: lets apps like Macrodroid/Tasker call kill-all.
+                 adb: am broadcast -a com.northmendo.Appzuku.ACTION_KILL_ALL -->
+            <intent-filter>
+                <action android:name="com.northmendo.Appzuku.ACTION_KILL_ALL" />
+            </intent-filter>
+        </receiver>
 
         <receiver android:name=".BootReceiver" android:exported="false">
             <intent-filter>
