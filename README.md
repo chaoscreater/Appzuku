@@ -42,11 +42,9 @@ https://github.com/chaoscreater/Appzuku/blob/main/app-debug.apk
 - **RAM Monitoring**: Real-time display of system RAM usage.
 
 ## Screenshots
-<p align="center">
-  <img src="" width="30%">
-  <img src="" width="30%">
-  <img src="" width="30%">
-</p>
+<img width="412" height="861" alt="image" src="https://github.com/user-attachments/assets/dab95638-aefa-412e-a2c9-3caa55c16d8b" />
+<img width="418" height="870" alt="image" src="https://github.com/user-attachments/assets/ebcbc6db-74ba-4d23-af1c-f3b9a68eebda" />
+<img width="411" height="869" alt="image" src="https://github.com/user-attachments/assets/854e4811-b766-4a5e-a94f-1613f0c9d881" />
 
 ## Requirements
 - **Android Version**: 6.0 (SDK 23) or higher.
