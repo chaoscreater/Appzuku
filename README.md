@@ -1,13 +1,35 @@
 # Appzuku
-![Logo](https://github.com/northmendo/Appzuku/blob/f58b2f820655d7ca59ee699159965b110e23f1d5/docs/images/logo.png)
+![Logo]()
 <p align="center">
   <img src="https://img.shields.io/github/downloads/northmendo/Appzuku/total?label=Downloads"/>
   <img src="https://img.shields.io/github/v/release/northmendo/Appzuku?include_prereleases&label=Release"/>
-  <img src="https://img.shields.io/badge/License-GPLv3-blue.svg"/>
+  <img src=""/>
 </p>
 
 ## What is Appzuku?
 Appzuku is an Android application that stops background applications using either Shizuku or Root permissions. It helps improve device performance, reduce memory usage, and lower device heat in a lightweight and safe way.
+
+## What's new in my version?
+I'm someone who:
+- Loves automation. One of my favourite automation apps on Android is MacroDroid / Tasker.
+- Need to have full control of my device. I don't like apps running in the background without my permission.
+- Frequently kill apps running on my phone that I did not approve or allow.
+
+Due to the above, the solution I'm looking for is very niche and unique to me. Superfreezz was a solution I used in the past. It supports intents, which means you can use MacroDroid / Tasker to call it and kill apps. You can configure what apps are whitelisted and what apps should be killed. The problem is that on a non-rooted device, the apps don't get killed automatically. It prompts users to tap on the "Force Stop" button for every app it's trying to kill. Also, Superfreezz doesn't support Shizuku. The author has long abandoned the project.
+
+Then, I came across Hail, which is an awesome app (highly recommended) and it works well with Shizuku. The problem is that it disables apps, not kill them. While you can suspend apps (which doesn't disable them), it's not quite what I want. I still use Hail though, but I needed something else separate.
+
+Finally, I came across shappky and AppZuku. The latter is an fork and an enhancement of the former. However, they're still missing features. So, I basically added 2 things. One is a kill all button that kills all running apps except for the ones that are whitelisted or hidden. The 2nd is the use of intents, which you can call from Macrodroid / Tasker. This means that under certain conditions, your automation macro will run and will kill the apps when the condition(s) are right.
+
+For the intent, create it like so:
+
+- Broadcast
+- Action: com.northmendo.Appzuku.ACTION_KILL_ALL
+- Package: com.northmendo.Appzuku
+- Class: com.northmendo.Appzuku.KillTriggerReceiver
+
+## Download
+https://github.com/chaoscreater/Appzuku/blob/main/app-debug.apk
 
 ## Features
 - **Flexible Permissions**: Works with either Shizuku or Root access.
@@ -21,9 +43,9 @@ Appzuku is an Android application that stops background applications using eithe
 
 ## Screenshots
 <p align="center">
-  <img src="https://github.com/northmendo/Appzuku/blob/main/docs/images/screenshot0.jpg" width="30%">
-  <img src="https://github.com/northmendo/Appzuku/blob/main/docs/images/screenshot1.jpg" width="30%">
-  <img src="https://github.com/northmendo/Appzuku/blob/main/docs/images/screenshot2.jpg" width="30%">
+  <img src="" width="30%">
+  <img src="" width="30%">
+  <img src="" width="30%">
 </p>
 
 ## Requirements
@@ -40,7 +62,7 @@ Appzuku is licensed under the [GNU General Public License v3.0](LICENSE).
 ## Donate
 If you want to support me, I would be very grateful. 
 
-[**PayPal**](https://www.paypal.com/donate/?hosted_button_id=DDJRFUXHSHRVN)
+[**Buy me a coffee**](https://ko-fi.com/ricky76324)
 
 ## Credits
-This project was forked from [YasserNull/shappky](https://github.com/YasserNull/shappky)
+This project was forked from [northmendo/Appzuku](https://github.com/northmendo/Appzuku)
