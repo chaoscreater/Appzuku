@@ -333,7 +333,14 @@ public class SettingsActivity extends BaseActivity {
             });
 
             dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Save", (d, w) -> {
-                appManager.saveBlacklistedApps(filterAdapter.getSelectedPackages());
+                Set<String> packagesToBlacklist = filterAdapter.getSelectedPackages();
+                // Preserve entries for apps not installed on this device (e.g. from another phone's backup)
+                Set<String> installedPkgs = new HashSet<>();
+                for (AppModel a : allApps) installedPkgs.add(a.getPackageName());
+                for (String pkg : appManager.getBlacklistedApps()) {
+                    if (!installedPkgs.contains(pkg)) packagesToBlacklist.add(pkg);
+                }
+                appManager.saveBlacklistedApps(packagesToBlacklist);
             });
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(this, R.color.dialog_button_text));
         });
@@ -583,6 +590,12 @@ public class SettingsActivity extends BaseActivity {
 
             whitelistDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Save", (dialog, which) -> {
                 Set<String> packagesToWhitelist = filterAdapter.getSelectedPackages();
+                // Preserve entries for apps not installed on this device (e.g. from another phone's backup)
+                Set<String> installedPkgs = new HashSet<>();
+                for (AppModel a : allApps) installedPkgs.add(a.getPackageName());
+                for (String pkg : appManager.getWhitelistedApps()) {
+                    if (!installedPkgs.contains(pkg)) packagesToWhitelist.add(pkg);
+                }
                 appManager.saveWhitelistedApps(packagesToWhitelist);
             });
             whitelistDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(this, R.color.dialog_button_text));
@@ -652,6 +665,12 @@ public class SettingsActivity extends BaseActivity {
 
             filterDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Save", (dialog, which) -> {
                 Set<String> packagesToHide = filterAdapter.getSelectedPackages();
+                // Preserve entries for apps not installed on this device (e.g. from another phone's backup)
+                Set<String> installedPkgs = new HashSet<>();
+                for (AppModel a : allApps) installedPkgs.add(a.getPackageName());
+                for (String pkg : appManager.getHiddenApps()) {
+                    if (!installedPkgs.contains(pkg)) packagesToHide.add(pkg);
+                }
                 appManager.saveHiddenApps(packagesToHide);
             });
             filterDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(this, R.color.dialog_button_text));
@@ -728,6 +747,12 @@ public class SettingsActivity extends BaseActivity {
 
             autostartDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Save", (dialog, which) -> {
                 Set<String> packagesToDisable = filterAdapter.getSelectedPackages();
+                // Preserve entries for apps not installed on this device (e.g. from another phone's backup)
+                Set<String> installedPkgs = new HashSet<>();
+                for (AppModel a : allApps) installedPkgs.add(a.getPackageName());
+                for (String pkg : appManager.getAutostartDisabledApps()) {
+                    if (!installedPkgs.contains(pkg)) packagesToDisable.add(pkg);
+                }
 
                 // Count system apps in selection
                 int systemAppCount = 0;
