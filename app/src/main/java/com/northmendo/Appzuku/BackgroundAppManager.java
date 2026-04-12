@@ -217,13 +217,19 @@ public class BackgroundAppManager {
                                 return false;
                             }
 
+                            ApplicationInfo appInfo = pm.getApplicationInfo(pkg, 0);
+
+                            // Skip system apps when not shown in settings
+                            if (!showSystemApps && (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                                return false;
+                            }
+
                             if (killMode == 1) { // Blacklist Mode
                                 return blacklistedApps.contains(pkg);
                             } else { // Whitelist Mode (Default)
                                 if (whitelistedApps.contains(pkg))
                                     return false;
                                 // In whitelist mode, check persistent flag
-                                ApplicationInfo appInfo = pm.getApplicationInfo(pkg, 0);
                                 return (appInfo.flags & ApplicationInfo.FLAG_PERSISTENT) == 0;
                             }
                         } catch (PackageManager.NameNotFoundException e) {
@@ -252,7 +258,7 @@ public class BackgroundAppManager {
                 }
 
                 String killCommand = toKill.stream()
-                        .map(pkg -> "am force-stop " + pkg)
+                        .map(this::getKillCommand)
                         .collect(Collectors.joining("; "));
                 String finalCommand = killCommand + "; am kill-all";
 
@@ -551,7 +557,7 @@ public class BackgroundAppManager {
 
     // Get the set of hidden app package names
     public Set<String> getHiddenApps() {
-        return sharedpreferences.getStringSet(KEY_HIDDEN_APPS, new HashSet<>());
+        return new HashSet<>(sharedpreferences.getStringSet(KEY_HIDDEN_APPS, new HashSet<>()));
     }
 
     // Save the set of hidden app package names
@@ -680,7 +686,7 @@ public class BackgroundAppManager {
         }
 
         String command = packageNames.stream()
-                .map(pkg -> "am force-stop " + pkg)
+                .map(this::getKillCommand)
                 .collect(Collectors.joining("; "));
         final long finalTotalKb = totalKb;
         shellManager.runShellCommand(command, () -> {
@@ -723,6 +729,7 @@ public class BackgroundAppManager {
                 if (whitelisted.contains(pkg))           continue;
                 if (ProtectedApps.isProtected(context, pkg)) continue;
                 if (app.isWhitelisted())                 continue;
+                if (!showSystemApps && app.isSystemApp()) continue;
                 toKill.add(pkg);
                 totalBytes += app.getAppRamBytes();
             }
@@ -754,7 +761,7 @@ public class BackgroundAppManager {
             }
 
             String killCommand = toKill.stream()
-                    .map(pkg -> "am force-stop " + pkg)
+                    .map(this::getKillCommand)
                     .collect(Collectors.joining("; "));
 
             final long finalBytes = totalBytes;
@@ -769,6 +776,20 @@ public class BackgroundAppManager {
                 if (onComplete != null) onComplete.run();
             });
         });
+    }
+
+    /**
+     * Returns the appropriate shell command to kill a package.
+     * System apps cannot be stopped with "am force-stop", so we use "kill" on their PID instead.
+     */
+    private String getKillCommand(String packageName) {
+        try {
+            ApplicationInfo appInfo = context.getPackageManager().getApplicationInfo(packageName, 0);
+            if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                return "kill $(pidof " + packageName + ")";
+            }
+        } catch (PackageManager.NameNotFoundException ignored) {}
+        return "am force-stop " + packageName;
     }
 
     // Kill a single app by package name
@@ -795,7 +816,7 @@ public class BackgroundAppManager {
             }
         }
         final long finalAppRamBytes = appRamBytes;
-        shellManager.runShellCommand("am force-stop " + packageName, () -> {
+        shellManager.runShellCommand(getKillCommand(packageName), () -> {
             if (finalAppRamBytes > 0) {
                 String message = "Free up " + formatMemorySize(finalAppRamBytes);
                 handler.post(() -> Toast.makeText(context, message, Toast.LENGTH_LONG).show());
